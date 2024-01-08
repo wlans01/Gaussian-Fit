@@ -23,12 +23,23 @@ jobs:
       - name: Build with PyInstaller
         run: pyinstaller src/FittingGui.spec
 
+      - name: Create Release
+        id: create_release  # 이 ID를 사용하여 출력 참조
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: .src/dist/FittingGui.exe
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # 여기에서 upload_url 참조
+          asset_path: ./src/dist/FittingGui.exe
           asset_name: FittingGui.exe
           asset_content_type: application/octet-stream
