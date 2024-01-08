@@ -1,5 +1,0 @@
-2024-01-08 17:00:05,807:ERROR:ERROR
-Traceback (most recent call last):
-  File "C:\Users\wlans\Desktop\fitting\src\FittingGui.py", line 633, in run
-    os.rename(tmp_file_path, new_file_path)
-FileExistsError: [WinError 183] 파일이 이미 있으므로 만들 수 없습니다: 'C:\\Users\\wlans\\AppData\\Local\\Temp\\tmpvk7or7ta.exe' -> 'C:\\Users\\wlans\\AppData\\Local\\Temp\\GaussianFit.exe'

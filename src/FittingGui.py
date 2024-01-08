@@ -547,7 +547,6 @@ class DataFittngApp(QMainWindow):
 ############################################UPDATE###########################
 import requests
 import subprocess
-import shutil
 import tempfile
 
 
@@ -588,13 +587,15 @@ class SplashScreen(QSplashScreen):
                     self.showMessage("업데이트를 다운로드 중입니다...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
                     time.sleep(1)
 
-                self.showMessage("업데이트 완료", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-
+                self.showMessage("업데이트 완료. 프로그램 재시작", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                return True
             else : 
                 self.showMessage("기존 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                
         else:
             self.showMessage("최신 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
 
+        return False
 
     def on_update_check_finished(self, update_finish):
         if update_finish:
@@ -611,7 +612,7 @@ class UpdateThread(QThread):
 
     def run(self):
         exe_path = sys.executable
-        # exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\dist\\GaussianFit.exe"
+        exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\GaussianFit.exe"
         response = requests.get(self.download_url, stream=True)
 
         if response.status_code == 200:
@@ -638,7 +639,7 @@ class UpdateThread(QThread):
             
             batch_script = create_update_script(new_file_path, exe_path)
             subprocess.Popen(batch_script, shell=True,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-            sys.exit()
+            self.finished.emit(True)
 
         else:
             QMessageBox.warning(self, 'Downlode Fail', 'Pls cheak your enternet.')
@@ -649,7 +650,6 @@ def create_update_script(temp_exe_path, current_exe_path):
     # 임시 배치 파일 생성
     with tempfile.NamedTemporaryFile(delete=False, suffix='.bat', mode='w') as bat_file:
         bat_file.write(f"@echo off\n")
-        bat_file.write(f"TIMEOUT /T 5 /NOBREAK\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
         bat_file.write(f"DEL \"%~f0\"\n")
@@ -682,20 +682,25 @@ def resource_path(relative_path):
 
 if __name__ == '__main__':
     # 로그 설정
-    # logging.basicConfig(filename='gaussian_fit_error_log.txt', level=logging.ERROR, 
+    logging.basicConfig(filename='gaussian_fit_error_log.txt', level=logging.ERROR, 
                         
-    #                     format='%(asctime)s:%(levelname)s:%(message)s')
-    # sys.excepthook = ExceptionHandler().handle_exception
+                        format='%(asctime)s:%(levelname)s:%(message)s')
+    sys.excepthook = ExceptionHandler().handle_exception
     app = QApplication(sys.argv)
 
     splash_pix = QPixmap(resource_path('assets/fingerPrint.png'))
     splash = SplashScreen(splash_pix)
     splash.show()
-    splash.update_cheak()
+    is_upate = splash.update_cheak()
+    
 
     main_window = DataFittngApp()
     splash.finish(main_window)
-    main_window.show()
 
+    if is_upate:
+        sys.exit()
+
+    main_window.show()
     sys.exit(app.exec_())
+    
 
