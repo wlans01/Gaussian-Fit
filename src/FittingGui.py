@@ -335,7 +335,7 @@ class DataFittngApp(QMainWindow):
 
     # help
     def show_help(self):
-        help_pdf_file = resource_path('assets/LaserMicroscopeGUIMANUAL.pdf')
+        help_pdf_file = resource_path('assets/GaussianFittingGuiManaul.pdf')
         os.startfile(help_pdf_file)
         
 
