@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.0.4'
+CURRENT_VERSION = '1.0.5'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -233,7 +233,7 @@ class DataFittngApp(QMainWindow):
         
         # GUI 크기 및 타이틀 설정
         # self.setGeometry(300, 300, 800, 600)
-        self.setWindowTitle('Fitting GUI')
+        self.setWindowTitle(f'Fitting GUI V{CURRENT_VERSION}')
         self.show()
     
 
