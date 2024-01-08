@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.1.2'
+CURRENT_VERSION = '1.1.3'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -622,8 +622,6 @@ class UpdateThread(QThread):
                     tmp_file.write(chunk)
                 tmp_file_path = tmp_file.name
 
-            
-                        # 새 파일 이름 설정
             new_file_name = "GaussianFit.exe"
 
             # 디렉토리 경로 추출 및 새 파일 경로 생성
@@ -671,7 +669,7 @@ class ExceptionHandler:
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
+
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
