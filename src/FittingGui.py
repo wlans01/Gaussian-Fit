@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.1.7'
+CURRENT_VERSION = '1.1.8'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -562,40 +562,44 @@ class SplashScreen(QSplashScreen):
         
 
     def update_cheak(self):
-        response = requests.get('https://api.github.com/repos/wlans01/Gaussian-Fit/releases/latest')
-        data = response.json()
-        latest_version = data['tag_name']
-        current_version = CURRENT_VERSION
+        try:
+            response = requests.get('https://api.github.com/repos/wlans01/Gaussian-Fit/releases/latest')
+            data = response.json()
+            latest_version = data['tag_name']
+            current_version = CURRENT_VERSION
 
-        if latest_version > current_version:
-            reply = QMessageBox.question(self, '업데이트 확인', 
-                                         f'새로운 버전 {latest_version}이(가) 있습니다. 지금 업데이트하시겠습니까?(현재 버전 {CURRENT_VERSION})',
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            
-            if reply == QMessageBox.Yes:
-                download_url = data['assets'][0]['browser_download_url']
-
-                self.update_thread = UpdateThread(download_url)
-                self.update_thread.finished.connect(self.on_update_check_finished)
-                self.update_thread.start()
-
-                while not self.update_finish:
-                    self.showMessage("업데이트를 다운로드 중입니다.", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-                    time.sleep(1)
-                    self.showMessage("업데이트를 다운로드 중입니다..", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-                    time.sleep(1)
-                    self.showMessage("업데이트를 다운로드 중입니다...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-                    time.sleep(1)
-
-                self.showMessage("업데이트 완료. 프로그램 재시작", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-                return True
-            else : 
-                self.showMessage("기존 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+            if latest_version > current_version:
+                reply = QMessageBox.question(self, '업데이트 확인', 
+                                            f'새로운 버전 {latest_version}이(가) 있습니다. 지금 업데이트하시겠습니까?(현재 버전 {CURRENT_VERSION})',
+                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 
-        else:
-            self.showMessage("최신 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                if reply == QMessageBox.Yes:
+                    download_url = data['assets'][0]['browser_download_url']
 
-        return False
+                    self.update_thread = UpdateThread(download_url)
+                    self.update_thread.finished.connect(self.on_update_check_finished)
+                    self.update_thread.start()
+
+                    while not self.update_finish:
+                        self.showMessage("업데이트를 다운로드 중입니다.", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                        time.sleep(1)
+                        self.showMessage("업데이트를 다운로드 중입니다..", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                        time.sleep(1)
+                        self.showMessage("업데이트를 다운로드 중입니다...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                        time.sleep(1)
+
+                    self.showMessage("업데이트 완료. 프로그램 재시작", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                    return True
+                else : 
+                    self.showMessage("기존 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                    
+            else:
+                self.showMessage("최신 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+
+            return False
+        except:
+            self.showMessage("업데이트 확인 실패", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+            return False
 
     def on_update_check_finished(self, update_finish):
         if update_finish:
@@ -650,7 +654,7 @@ def create_update_script(temp_exe_path, current_exe_path):
         bat_file.write(f"@echo off\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
-        # bat_file.write(f"DEL \"%~f0\"\n")
+        bat_file.write(f"DEL \"%~f0\"\n")
         return bat_file.name
 
 
