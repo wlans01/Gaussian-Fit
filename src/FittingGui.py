@@ -11,8 +11,8 @@ import pandas as pd
 import logging
 import time
 
-
-
+# 현재 버전
+CURRENT_VERSION = '1.0.0'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
