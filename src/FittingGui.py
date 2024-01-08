@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.1.1'
+CURRENT_VERSION = '1.1.2'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -652,7 +652,7 @@ def create_update_script(temp_exe_path, current_exe_path):
         bat_file.write(f"@echo off\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
-        bat_file.write(f"DEL \"%~f0\"\n")
+        # bat_file.write(f"DEL \"%~f0\"\n")
         return bat_file.name
 
 
