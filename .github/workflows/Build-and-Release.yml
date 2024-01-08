@@ -20,17 +20,21 @@ jobs:
       - name: Install Dependencies
         run: pip install -r src/requirements.txt
 
+      - name: Extract Version
+        id: extract_version
+        run: echo "::set-output name=version::$(python extract_version.py)"
+
       - name: Build with PyInstaller
         run: pyinstaller src/FittingGui.spec
 
       - name: Create Release
-        id: create_release  # 이 ID를 사용하여 출력 참조
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.extract_version.outputs.version }}
+          release_name: Release ${{ steps.extract_version.outputs.version }}
           draft: false
           prerelease: false
 
@@ -39,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}  # 여기에서 upload_url 참조
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./src/dist/FittingGui.exe
           asset_name: FittingGui.exe
           asset_content_type: application/octet-stream
