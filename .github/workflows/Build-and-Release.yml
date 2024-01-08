@@ -10,25 +10,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
 
-    - name: Install Dependencies
-      run: pip install -r requirements.txt
+      - name: Install Dependencies
+        run: pip install -r src/requirements.txt
 
-    - name: Build with PyInstaller
-      run: pyinstaller FittingGui.spec
+      - name: Build with PyInstaller
+        run: pyinstaller src/FittingGui.spec
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/FittingGui.exe
-        asset_name: FittingGui.exe
-        asset_content_type: application/octet-stream
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./dist/FittingGui.exe
+          asset_name: FittingGui.exe
+          asset_content_type: application/octet-stream
