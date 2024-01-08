@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.1.9'
+CURRENT_VERSION = '1.2.0'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -616,7 +616,7 @@ class UpdateThread(QThread):
 
     def run(self):
         exe_path = sys.executable
-        exe_path = "C:\\Users\\wlans\\Desktop\\test\\GaussianFit.exe"
+        # exe_path = "C:\\Users\\wlans\\Desktop\\test\\GaussianFit.exe"
         response = requests.get(self.download_url, stream=True)
 
         if response.status_code == 200:
