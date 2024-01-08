@@ -22,7 +22,7 @@ jobs:
 
       - name: Extract Version
         id: extract_version
-        run: echo "::set-output name=version::$(python extract_version.py)"
+        run: echo "::set-output name=version::$(python src/extract_version.py)"
 
       - name: Build with PyInstaller
         run: pyinstaller src/FittingGui.spec
