@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.1.8'
+CURRENT_VERSION = '1.1.9'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -616,7 +616,7 @@ class UpdateThread(QThread):
 
     def run(self):
         exe_path = sys.executable
-        # exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\GaussianFit.exe"
+        exe_path = "C:\\Users\\wlans\\Desktop\\test\\GaussianFit.exe"
         response = requests.get(self.download_url, stream=True)
 
         if response.status_code == 200:
@@ -652,6 +652,7 @@ def create_update_script(temp_exe_path, current_exe_path):
     # 임시 배치 파일 생성
     with tempfile.NamedTemporaryFile(delete=False, suffix='.bat', mode='w') as bat_file:
         bat_file.write(f"@echo off\n")
+        bat_file.write(f"TIMEOUT /T 3 /NOBREAK\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
         bat_file.write(f"DEL \"%~f0\"\n")
