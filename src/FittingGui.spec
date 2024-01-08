@@ -31,7 +31,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='Gaussian Fit',
+    name='GaussianFit',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
