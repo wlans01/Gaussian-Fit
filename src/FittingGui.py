@@ -3,7 +3,7 @@ import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit,QLabel,QRadioButton,QTextEdit,QMessageBox,QFileDialog,QTabWidget,QGridLayout,QComboBox,QSizePolicy,QSplashScreen
 import matplotlib.pyplot as plt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt,QThread, pyqtSignal
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import os
 from scipy.optimize import curve_fit 
@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.0.7'
+CURRENT_VERSION = '1.1.0'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -234,7 +234,6 @@ class DataFittngApp(QMainWindow):
         # GUI 크기 및 타이틀 설정
         # self.setGeometry(300, 300, 800, 600)
         self.setWindowTitle(f'Fitting GUI V{CURRENT_VERSION}')
-        self.show()
     
 
 
@@ -545,18 +544,117 @@ class DataFittngApp(QMainWindow):
             return
         
 
-##########################################################
+############################################UPDATE###########################
+import requests
+import subprocess
+import shutil
+import tempfile
 
-# 업데이트 버전 체크
-def check_version(splash):
-    # 버전 체크 로직
-    for i in range(1, 4):
-        time.sleep(1)  # 실제 버전 체크 로직으로 대체
-        splash.showMessage(f"버전 확인 중... {i}/3", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
 
-    # 여기에 버전 체크 로직 결과에 따라 메시지 업데이트
-    splash.showMessage("최신 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
-    time.sleep(2)
+class SplashScreen(QSplashScreen):
+    def __init__(self, pixmap):
+        super().__init__(pixmap)
+        self.showMessage("업데이트 확인 중...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+        self.update_finish = False
+
+    def mousePressEvent(self, event):
+        # 마우스 클릭 이벤트를 무시합니다.
+        pass
+        
+
+    def update_cheak(self):
+        response = requests.get('https://api.github.com/repos/wlans01/Gaussian-Fit/releases/latest')
+        data = response.json()
+        latest_version = data['tag_name']
+        current_version = CURRENT_VERSION
+
+        if latest_version > current_version:
+            reply = QMessageBox.question(self, '업데이트 확인', 
+                                         f'새로운 버전 {latest_version}이(가) 있습니다. 지금 업데이트하시겠습니까?(현재 버전 {CURRENT_VERSION})',
+                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                download_url = data['assets'][0]['browser_download_url']
+
+                self.update_thread = UpdateThread(download_url)
+                self.update_thread.finished.connect(self.on_update_check_finished)
+                self.update_thread.start()
+
+                while not self.update_finish:
+                    self.showMessage("업데이트를 다운로드 중입니다.", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                    time.sleep(1)
+                    self.showMessage("업데이트를 다운로드 중입니다..", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                    time.sleep(1)
+                    self.showMessage("업데이트를 다운로드 중입니다...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+                    time.sleep(1)
+
+                self.showMessage("업데이트 완료", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+
+            else : 
+                self.showMessage("기존 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+        else:
+            self.showMessage("최신 버전 사용 중", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
+
+
+    def on_update_check_finished(self, update_finish):
+        if update_finish:
+            self.update_finish = True
+
+
+class UpdateThread(QThread):
+    finished = pyqtSignal(bool)
+
+    def __init__(self ,download_url ):
+        super().__init__()
+        self.download_url = download_url
+
+
+    def run(self):
+        exe_path = sys.executable
+        # exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\dist\\GaussianFit.exe"
+        response = requests.get(self.download_url, stream=True)
+
+        if response.status_code == 200:
+            # 임시 파일로 다운로드
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.exe') as tmp_file:
+                for chunk in response.iter_content(chunk_size=1024):
+                    tmp_file.write(chunk)
+                tmp_file_path = tmp_file.name
+
+            
+                        # 새 파일 이름 설정
+            new_file_name = "GaussianFit.exe"
+
+            # 디렉토리 경로 추출 및 새 파일 경로 생성
+            temp_file_dir = os.path.dirname(tmp_file_path)
+            new_file_path = os.path.join(temp_file_dir, new_file_name)
+
+            if os.path.exists(new_file_path):
+                # 안전하게 삭제하거나 필요한 다른 조치를 취함
+                os.remove(new_file_path)
+
+            # 파일 이름 변경
+            os.rename(tmp_file_path, new_file_path)
+            
+            batch_script = create_update_script(new_file_path, exe_path)
+            subprocess.Popen(batch_script, shell=True,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            sys.exit()
+
+        else:
+            QMessageBox.warning(self, 'Downlode Fail', 'Pls cheak your enternet.')
+        
+
+       
+def create_update_script(temp_exe_path, current_exe_path):
+    # 임시 배치 파일 생성
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.bat', mode='w') as bat_file:
+        bat_file.write(f"@echo off\n")
+        bat_file.write(f"TIMEOUT /T 5 /NOBREAK\n")
+        bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
+        bat_file.write(f"\"{current_exe_path}\"\n")
+        bat_file.write(f"DEL \"%~f0\"\n")
+        return bat_file.name
+
 
 
 
@@ -566,7 +664,7 @@ class ExceptionHandler:
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
 
-        logging.error("예외 발생", exc_info=(exc_type, exc_value, exc_traceback))
+        logging.error("ERROR", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 # exe 파일을 만들었을때 경로 인식을 위한 함수
@@ -584,20 +682,20 @@ def resource_path(relative_path):
 
 if __name__ == '__main__':
     # 로그 설정
-    logging.basicConfig(filename='gaussian_fit_error_log.txt', level=logging.ERROR, 
+    # logging.basicConfig(filename='gaussian_fit_error_log.txt', level=logging.ERROR, 
                         
-                        format='%(asctime)s:%(levelname)s:%(message)s')
-    sys.excepthook = ExceptionHandler().handle_exception
+    #                     format='%(asctime)s:%(levelname)s:%(message)s')
+    # sys.excepthook = ExceptionHandler().handle_exception
     app = QApplication(sys.argv)
 
     splash_pix = QPixmap(resource_path('assets/fingerPrint.png'))
-    splash = QSplashScreen(splash_pix)
+    splash = SplashScreen(splash_pix)
     splash.show()
+    splash.update_cheak()
 
-    check_version(splash)
+    main_window = DataFittngApp()
+    splash.finish(main_window)
+    main_window.show()
 
-    main_win = DataFittngApp()
-
-    splash.finish(main_win)
     sys.exit(app.exec_())
 
