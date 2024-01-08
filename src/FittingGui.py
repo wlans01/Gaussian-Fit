@@ -612,7 +612,7 @@ class UpdateThread(QThread):
 
     def run(self):
         exe_path = sys.executable
-        exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\GaussianFit.exe"
+        # exe_path = "C:\\Users\\wlans\\Desktop\\fitting\\src\\GaussianFit.exe"
         response = requests.get(self.download_url, stream=True)
 
         if response.status_code == 200:
