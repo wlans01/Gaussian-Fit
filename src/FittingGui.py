@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.3.3'
+CURRENT_VERSION = '1.3.4'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -309,13 +309,17 @@ class DataFittngApp(QMainWindow):
 
     def update_item(self):
         ''''''
-       
+        
         df = pd.read_excel(os.path.join(self.data_path,self.fitting_method_file_name_QComboBox.currentText()))
+        df.dropna(inplace=True)
+        if df.empty:
+            self.fitting_method_file_name_QComboBox.removeItem(self.fitting_method_file_name_QComboBox.currentIndex())
+            return
         self.data = df.to_numpy()
         self.data[:,0] = self.convert_pixel_to_um(self.data[:,0])
-        if self.is_fit:
-            self.fit()
-        else :self.update_graph(self.data[:,0],self.data[:,1])
+        self.update_graph(self.data[:,0],self.data[:,1])
+
+       
 
         
 
@@ -354,6 +358,7 @@ class DataFittngApp(QMainWindow):
 
         self.ax.clear()
         sc = self.ax.plot(x, y , 'black')
+        self.ax.set_title(f'{self.fitting_method_file_name_QComboBox.currentText()}')
 
         self.canvas.draw()
 
