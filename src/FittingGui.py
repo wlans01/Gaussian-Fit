@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.2.7'
+CURRENT_VERSION = '1.2.8'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -632,7 +632,7 @@ class UpdateThread(QThread):
                     tmp_file.write(chunk)
                 tmp_file_path = tmp_file.name
 
-            new_file_name = "GaussianFit.exe"
+            new_file_name = exe_path.split('\\')[-1]
 
             # 디렉토리 경로 추출 및 새 파일 경로 생성
             temp_file_dir = os.path.dirname(tmp_file_path)
@@ -645,7 +645,7 @@ class UpdateThread(QThread):
             # 파일 이름 변경
             os.rename(tmp_file_path, new_file_path)
             
-            batch_script = create_update_script(new_file_path, exe_path ,shell=True)
+            batch_script = create_update_script(new_file_path, exe_path)
             subprocess.Popen(batch_script)
             self.finished.emit(True)
 
