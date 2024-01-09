@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.2.3'
+CURRENT_VERSION = '1.2.4'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -640,7 +640,7 @@ class UpdateThread(QThread):
             os.rename(tmp_file_path, new_file_path)
             
             batch_script = create_update_script(new_file_path, exe_path)
-            subprocess.Popen(batch_script, shell=True,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            subprocess.Popen(batch_script)
             self.finished.emit(True)
 
         else:
@@ -651,11 +651,11 @@ class UpdateThread(QThread):
 def create_update_script(temp_exe_path, current_exe_path):
     # 임시 배치 파일 생성
     with tempfile.NamedTemporaryFile(delete=False, suffix='.bat', mode='w') as bat_file:
-        # bat_file.write(f"@echo off\n")
-        bat_file.write(f"TIMEOUT /T 3 /NOBREAK\n")
+        bat_file.write(f"@echo off\n")
+        bat_file.write(f"TIMEOUT /T 5 /NOBREAK\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
-        # bat_file.write(f"DEL \"%~f0\"\n")
+        bat_file.write(f"DEL \"%~f0\"\n")
         return bat_file.name
 
 
