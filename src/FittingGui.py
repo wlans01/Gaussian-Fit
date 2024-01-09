@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.2.5'
+CURRENT_VERSION = '1.2.6'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
@@ -583,10 +583,16 @@ class SplashScreen(QSplashScreen):
                     while not self.update_finish:
                         self.showMessage("업데이트를 다운로드 중입니다.", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
                         time.sleep(1)
+                        if self.update_finish:
+                            break
                         self.showMessage("업데이트를 다운로드 중입니다..", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
                         time.sleep(1)
+                        if self.update_finish:
+                            break
                         self.showMessage("업데이트를 다운로드 중입니다...", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
                         time.sleep(1)
+                        if self.update_finish:
+                            break
 
                     self.showMessage("업데이트 완료. 프로그램 재시작", Qt.AlignBottom | Qt.AlignCenter, Qt.white)
                     return True
@@ -639,7 +645,7 @@ class UpdateThread(QThread):
             # 파일 이름 변경
             os.rename(tmp_file_path, new_file_path)
             
-            batch_script = create_update_script(new_file_path, exe_path)
+            batch_script = create_update_script(new_file_path, exe_path ,shell=True)
             subprocess.Popen(batch_script)
             self.finished.emit(True)
 
@@ -652,7 +658,7 @@ def create_update_script(temp_exe_path, current_exe_path):
     # 임시 배치 파일 생성
     with tempfile.NamedTemporaryFile(delete=False, suffix='.bat', mode='w') as bat_file:
         bat_file.write(f"@echo off\n")
-        bat_file.write(f"TIMEOUT /T 5 /NOBREAK\n")
+        bat_file.write(f"TIMEOUT /T 6 /NOBREAK\n")
         bat_file.write(f"MOVE /Y \"{temp_exe_path}\" \"{current_exe_path}\"\n")
         bat_file.write(f"\"{current_exe_path}\"\n")
         bat_file.write(f"DEL \"%~f0\"\n")
