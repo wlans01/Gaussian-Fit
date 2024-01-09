@@ -12,7 +12,7 @@ import logging
 import time
 
 # 현재 버전
-CURRENT_VERSION = '1.2.8'
+CURRENT_VERSION = '1.2.9'
 
 # 가우시안 함수 정의
 def gaussian(x, amplitude, mean, stddev , y0):
